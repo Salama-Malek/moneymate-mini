@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "expo-av": "^15.1.7",
+    "expo-haptics": "^14.1.4",
+    "expo-sensors": "^14.1.4"
+  }
+}

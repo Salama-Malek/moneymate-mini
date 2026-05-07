@@ -1,0 +1,79 @@
+# MoneyMate – Theme, Colors, and Animations
+
+**Author:** Salama Malek
+
+---
+
+## 1. Color Theme
+
+**Primary Palette:**
+
+* Primary: #6C63FF (Vivid Indigo)
+* Secondary: #FF6584 (Pink Coral)
+* Success: #4CAF50 (Paid/Completed)
+* Warning: #FFC107 (Pending)
+* Error: #F44336 (Overdue)
+* Background: #F5F6FA (Light background)
+* Card Background: #FFFFFF
+* Text Primary: #333333
+* Text Secondary: #666666
+
+**Gradient Example:**
+
+* linear-gradient(45deg, #6C63FF, #FF6584)
+
+---
+
+## 2. Animations & Transitions
+
+**App Launch Animation:**
+
+* Show "Salama Malek" as splash screen
+* Fade-in opacity 0 -> 1
+* Scale 0.8 -> 1 over 800ms
+
+**Transaction Cards:**
+
+* Slide-in from right with small bounce on add
+* Rotate slightly while fading for archive/restore
+
+**Buttons & Interactions:**
+
+* Ripple effect on press (using primary color)
+* Subtle color pulse on Add Transaction button
+* Optional watermark "SM" on Add button
+
+**Dashboard Totals:**
+
+* Count-up animation on totals
+* Smooth color transition based on status (green/yellow/red)
+
+**Tab Transitions:**
+
+* Smooth slide/fade between Active / Archived tabs
+* Animated underline with gradient on selected tab
+
+---
+
+## 3. Typography
+
+* Primary Font: Poppins or Roboto (readable body text)
+* Secondary Font: Montserrat (headers, charts, emphasis)
+* Bold for amounts and important statuses
+
+---
+
+## 4. UI Style Notes
+
+* Rounded corners: border-radius: 16px on cards/buttons
+* Soft shadows: shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10
+* Consistent spacing: 16–24px between elements
+* Optional watermark: "SM" in transaction list background, opacity 0.05
+
+---
+
+## 5. Notes
+
+* All animations should feel smooth, modern, and subtle.
+* Colors and fonts should appeal to young, tech-savvy users.
+* Incorporate "Salama Malek" branding subtly throughout the UI.

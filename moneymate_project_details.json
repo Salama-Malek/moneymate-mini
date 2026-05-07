@@ -1,0 +1,31 @@
+{
+  "projectName": "MoneyMate",
+  "description": "Offline React Native app for tracking money lent or borrowed with multi-currency support, notifications, and archiving.",
+  "features": {
+    "transactions": ["Add, edit, delete, archive, restore transactions", "Type (Lend/Borrow), person, amount, currency, date, dueDate, status, notes, optional recurring"],
+    "notifications": ["Local push notifications for upcoming due dates", "Configurable reminder timing", "Stop notifications for archived or deleted transactions"],
+    "multiCurrency": ["Store currency per transaction", "Optional total in default currency"],
+    "analyticsDashboard": ["Totals: lent, borrowed, outstanding, overdue", "Optional charts"],
+    "searchFilter": ["Search by person, amount, notes", "Filter by type, status, currency"],
+    "offlineStorage": ["AsyncStorage or SQLite", "Export/import JSON backup"],
+    "optional": ["Recurring transactions", "PIN/biometric login", "Calendar view", "Dark/light theme"]
+  },
+  "dataModel": {
+    "id": "uuid",
+    "type": "lend | borrow",
+    "person": "string",
+    "amount": "number",
+    "currency": "string",
+    "date": "string",
+    "dueDate": "string",
+    "status": "pending | paid",
+    "archived": "boolean",
+    "notes": "string (optional)",
+    "recurring": "{frequency: string, endDate: string} | null"
+  },
+  "screens": ["Home/Dashboard", "Transaction List (Active/Archived)", "Add/Edit Transaction", "Archived Transactions", "Notification Settings", "Analytics/Insights", "Settings"],
+  "techStack": ["React Native + TypeScript", "AsyncStorage/SQLite/Realm", "Redux/Zustand", "date-fns/moment", "Optional Currency API"],
+  "installation": ["npm install or yarn install", "npx react-native run-android", "npx react-native run-ios"],
+  "usageFlow": ["View active transactions", "Add transaction", "Notifications scheduled", "Mark as paid and archive", "Restore archived if needed", "Search/filter/view summary"],
+  "offlineFirst": true
+}
