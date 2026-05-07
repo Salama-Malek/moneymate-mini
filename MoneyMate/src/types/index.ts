@@ -9,10 +9,19 @@ export interface Transaction {
   status: 'pending' | 'paid';
   archived: boolean;
   notes?: string;
+  category?: string;
   recurring?: {
     frequency: string;
     endDate: string;
+    lastGeneratedDate?: string;
   } | null;
+}
+
+export interface Category {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
 }
 
 export interface Wallet {

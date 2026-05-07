@@ -1,4 +1,19 @@
-import { Currency, RecurringFrequency, Language, Translations } from '../types';
+import { Currency, RecurringFrequency, Language, Translations, Category } from '../types';
+
+export const CATEGORIES: Category[] = [
+  { id: 'general', label: 'General', icon: 'pricetag', color: '#6C63FF' },
+  { id: 'family', label: 'Family', icon: 'people', color: '#FF6584' },
+  { id: 'friends', label: 'Friends', icon: 'happy', color: '#4CAF50' },
+  { id: 'work', label: 'Work', icon: 'briefcase', color: '#FF9800' },
+  { id: 'rent', label: 'Rent', icon: 'home', color: '#9C27B0' },
+  { id: 'food', label: 'Food', icon: 'restaurant', color: '#FFC107' },
+  { id: 'transport', label: 'Transport', icon: 'car', color: '#00BCD4' },
+  { id: 'shopping', label: 'Shopping', icon: 'cart', color: '#795548' },
+  { id: 'health', label: 'Health', icon: 'medkit', color: '#F44336' },
+  { id: 'other', label: 'Other', icon: 'ellipsis-horizontal', color: '#607D8B' },
+];
+
+export const DEFAULT_CATEGORY_ID = 'general';
 
 // Color Theme based on moneymate_theme_animations.txt
 export const COLORS = {

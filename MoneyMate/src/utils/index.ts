@@ -32,6 +32,8 @@ export const configureNotifications = async () => {
 
       return {
         shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
         shouldPlaySound: true,
         shouldSetBadge: false,
       };
@@ -94,6 +96,7 @@ export const scheduleNotification = async (
           categoryIdentifier: notificationType,
         },
         trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
           date: reminderDate,
         },
         identifier,
@@ -208,6 +211,8 @@ export const calculateDashboardStats = (transactions: Transaction[]): DashboardS
     outstandingBorrowed: 0,
     overdueCount: 0,
     upcomingCount: 0,
+    totalWalletBalance: 0,
+    defaultCurrencyBalance: 0,
   };
 
   activeTransactions.forEach(transaction => {
@@ -322,6 +327,23 @@ export const validateTransaction = (data: Partial<Transaction>): string[] => {
   }
   
   return errors;
+};
+
+// Export data to CSV
+export const exportDataAsCSV = (transactions: Transaction[]): string => {
+  const headers = ['id', 'type', 'person', 'amount', 'currency', 'category', 'date', 'dueDate', 'status', 'archived', 'notes'];
+  const escape = (v: unknown) => {
+    const s = String(v ?? '');
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const lines = [headers.join(',')];
+  for (const t of transactions) {
+    lines.push([
+      t.id, t.type, t.person, t.amount, t.currency, t.category || '',
+      t.date, t.dueDate, t.status, t.archived, (t.notes || '').replace(/\n/g, ' '),
+    ].map(escape).join(','));
+  }
+  return lines.join('\n');
 };
 
 // Export data to JSON

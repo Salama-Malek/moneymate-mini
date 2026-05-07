@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { I18nManager } from 'react-native';
-import { TRANSLATIONS, DEFAULT_LANGUAGE, LANGUAGES } from '../constants/translations';
+import { TRANSLATIONS } from '../constants/translations';
+import { DEFAULT_LANGUAGE, LANGUAGES } from '../constants';
 import { useMoneyMateStore } from '../store';
 
 interface LanguageContextType {

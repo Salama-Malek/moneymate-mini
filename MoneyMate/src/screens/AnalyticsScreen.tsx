@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { BarChart, PieChart } from 'react-native-chart-kit';
 import { useMoneyMateStore } from '../store';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, FONT_SIZES } from '../constants';
 import { formatCurrency, formatDate } from '../utils';
@@ -68,65 +69,60 @@ const AnalyticsScreen: React.FC = () => {
     return { month, total: monthlyTotal, count: monthTransactions.length };
   }).reverse();
 
+  const chartConfig = {
+    backgroundGradientFrom: COLORS.cardBackground,
+    backgroundGradientTo: COLORS.cardBackground,
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(108, 99, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(102, 102, 102, ${opacity})`,
+    barPercentage: 0.6,
+    propsForBackgroundLines: { stroke: COLORS.border },
+  };
+
   const renderPieChart = () => {
     const total = stats.outstandingLent + stats.outstandingBorrowed;
     if (total === 0) return null;
 
-    const lentPercentage = (stats.outstandingLent / total) * 100;
-    const borrowedPercentage = (stats.outstandingBorrowed / total) * 100;
+    const data = [
+      { name: 'Lent', amount: stats.outstandingLent, color: COLORS.primary, legendFontColor: COLORS.textPrimary, legendFontSize: 13 },
+      { name: 'Borrowed', amount: stats.outstandingBorrowed, color: COLORS.secondary, legendFontColor: COLORS.textPrimary, legendFontSize: 13 },
+    ].filter(d => d.amount > 0);
 
     return (
       <View style={styles.chartContainer}>
         <Text style={styles.chartTitle}>Outstanding Balance Distribution</Text>
-        <View style={styles.pieChart}>
-          <View style={styles.pieChartContainer}>
-            <View style={[styles.pieSlice, { backgroundColor: COLORS.primary }]} />
-            <View style={[styles.pieSlice, { backgroundColor: COLORS.secondary }]} />
-          </View>
-          <View style={styles.pieChartLegend}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: COLORS.primary }]} />
-              <Text style={styles.legendText}>
-                Lent: {lentPercentage.toFixed(1)}%
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: COLORS.secondary }]} />
-              <Text style={styles.legendText}>
-                Borrowed: {borrowedPercentage.toFixed(1)}%
-              </Text>
-            </View>
-          </View>
-        </View>
+        <PieChart
+          data={data}
+          width={width - SPACING.lg * 2}
+          height={200}
+          chartConfig={chartConfig}
+          accessor="amount"
+          backgroundColor="transparent"
+          paddingLeft="10"
+          absolute
+        />
       </View>
     );
   };
 
   const renderBarChart = () => {
-    const maxValue = Math.max(...monthlyTrends.map(t => t.total));
-    
     return (
       <View style={styles.chartContainer}>
         <Text style={styles.chartTitle}>Monthly Transaction Trends</Text>
-        <View style={styles.barChart}>
-          {monthlyTrends.map((trend, index) => (
-            <View key={index} style={styles.barContainer}>
-              <View style={styles.barWrapper}>
-                <View
-                  style={[
-                    styles.bar,
-                    {
-                      height: maxValue > 0 ? (trend.total / maxValue) * 120 : 0,
-                      backgroundColor: trend.total > 0 ? COLORS.primary : COLORS.border,
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={styles.barLabel}>{trend.month}</Text>
-              <Text style={styles.barValue}>{formatCurrency(trend.total, 'EGP')}</Text>
-            </View>
-          ))}
-        </View>
+        <BarChart
+          data={{
+            labels: monthlyTrends.map(t => t.month),
+            datasets: [{ data: monthlyTrends.map(t => t.total) }],
+          }}
+          width={width - SPACING.lg * 2}
+          height={220}
+          yAxisLabel=""
+          yAxisSuffix=""
+          chartConfig={chartConfig}
+          fromZero
+          showValuesOnTopOfBars
+          style={{ borderRadius: BORDER_RADIUS.md }}
+        />
       </View>
     );
   };

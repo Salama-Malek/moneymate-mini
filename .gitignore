@@ -1,0 +1,5 @@
+MoneyMate/node_modules/
+node_modules/
+.expo/
+.DS_Store
+*.log

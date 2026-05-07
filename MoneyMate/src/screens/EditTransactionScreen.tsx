@@ -15,7 +15,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useMoneyMateStore } from '../store';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, FONT_SIZES, CURRENCIES, RECURRING_FREQUENCIES } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, FONT_SIZES, CURRENCIES, RECURRING_FREQUENCIES, CATEGORIES, DEFAULT_CATEGORY_ID } from '../constants';
 import { validateTransaction } from '../utils';
 import type { Transaction } from '../types';
 import type { RouteProp } from '@react-navigation/native';
@@ -33,7 +33,7 @@ const EditTransactionScreen: React.FC = () => {
   // Find the transaction to edit
   const transaction = [...transactions, ...archivedTransactions].find(t => t.id === transactionId);
 
-  const [formData, setFormData] = useState<Partial<Transaction>>({});
+  const [formData, setFormData] = useState<Partial<Omit<Transaction, 'amount'>> & { amount?: string }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDueDatePicker, setShowDueDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
@@ -55,6 +55,7 @@ const EditTransactionScreen: React.FC = () => {
         dueDate: transaction.dueDate,
         status: transaction.status,
         notes: transaction.notes || '',
+        category: transaction.category || DEFAULT_CATEGORY_ID,
         recurring: transaction.recurring,
       });
       setShowRecurringOptions(!!transaction.recurring);
@@ -145,7 +146,7 @@ const EditTransactionScreen: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    const validationErrors = validateTransaction(formData);
+    const validationErrors = validateTransaction({ ...formData, amount: parseFloat(formData.amount || '0') });
     
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
@@ -154,7 +155,7 @@ const EditTransactionScreen: React.FC = () => {
 
     const updates: Partial<Transaction> = {
       ...formData,
-      amount: parseFloat(formData.amount as string),
+      amount: parseFloat(formData.amount || '0'),
     };
 
     updateTransaction(transactionId, updates);
@@ -436,6 +437,38 @@ const EditTransactionScreen: React.FC = () => {
                 )}
               </View>
             )}
+          </View>
+
+          {/* Category */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Category</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: SPACING.sm, gap: SPACING.sm }}>
+              {CATEGORIES.map((cat) => {
+                const selected = formData.category === cat.id;
+                return (
+                  <TouchableOpacity
+                    key={cat.id}
+                    onPress={() => handleInputChange('category', cat.id)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingHorizontal: SPACING.md,
+                      paddingVertical: SPACING.sm,
+                      marginRight: SPACING.sm,
+                      borderRadius: BORDER_RADIUS.md,
+                      backgroundColor: selected ? cat.color : COLORS.cardBackground,
+                      borderWidth: 1,
+                      borderColor: selected ? cat.color : COLORS.border,
+                    }}
+                  >
+                    <Ionicons name={cat.icon as any} size={16} color={selected ? 'white' : cat.color} />
+                    <Text style={{ marginLeft: SPACING.xs, color: selected ? 'white' : COLORS.textPrimary, fontWeight: '600' }}>
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
 
           {/* Notes */}

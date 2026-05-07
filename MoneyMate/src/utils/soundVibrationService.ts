@@ -1,5 +1,6 @@
 import { Vibration, Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
+import { Audio } from 'expo-av';
 
 // Haptic feedback types
 export type HapticType = 
@@ -206,11 +207,19 @@ class SoundVibrationService {
 
     try {
       // Check if custom sound exists for this type
-      if (this.hasCustomSound(type)) {
-        // For now, we'll use haptic feedback as a placeholder
-        // In a full implementation, you'd play the actual audio file
-        console.log(`Playing custom sound for ${type}`);
-        await this.triggerHaptic('light');
+      const custom = this.getCustomSoundByType(type);
+      if (custom?.uri) {
+        try {
+          const { sound } = await Audio.Sound.createAsync({ uri: custom.uri }, { shouldPlay: true });
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (!status.isLoaded || status.didJustFinish) {
+              sound.unloadAsync().catch(() => {});
+            }
+          });
+        } catch (e) {
+          console.log('Custom sound playback failed:', e);
+          await this.triggerHaptic('light');
+        }
         return;
       }
 

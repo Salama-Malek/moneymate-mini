@@ -6,11 +6,14 @@ import RootNavigator from './src/navigation';
 import { configureNotifications } from './src/utils';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
+import { useMoneyMateStore } from './src/store';
+import BiometricLock from './src/components/BiometricLock';
 
 export default function App() {
   useEffect(() => {
-    // Configure notifications when app starts
     configureNotifications();
+    // Generate any due recurring transactions on launch
+    useMoneyMateStore.getState().processRecurringTransactions();
   }, []);
 
   return (
@@ -19,7 +22,9 @@ export default function App() {
         <ThemeProvider>
           <LanguageProvider>
             <StatusBar style="auto" />
-            <RootNavigator />
+            <BiometricLock>
+              <RootNavigator />
+            </BiometricLock>
           </LanguageProvider>
         </ThemeProvider>
       </SafeAreaProvider>

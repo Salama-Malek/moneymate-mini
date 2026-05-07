@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction, Wallet, WalletTransaction, AppSettings, DashboardStats } from '../types';
-import { DEFAULT_WALLETS } from '../constants';
+import { DEFAULT_WALLETS, RECURRING_FREQUENCIES } from '../constants';
 import { scheduleNotification, cancelNotification, calculateDashboardStats } from '../utils';
 
 interface MoneyMateState {
@@ -31,6 +31,9 @@ interface MoneyMateState {
   // Settings
   updateSettings: (updates: Partial<AppSettings>) => void;
   setLoading: (loading: boolean) => void;
+
+  // Recurring
+  processRecurringTransactions: () => number;
 
   // Getters
   getDashboardStats: () => DashboardStats;
@@ -415,6 +418,90 @@ export const useMoneyMateStore = create<MoneyMateState>()(
 
       setLoading: (loading) => {
         set({ isLoading: loading });
+      },
+
+      processRecurringTransactions: () => {
+        const state = get();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const toCreate: Transaction[] = [];
+        const updates: { id: string; lastGeneratedDate: string }[] = [];
+
+        const allTx = [...state.transactions, ...state.archivedTransactions];
+        for (const tx of allTx) {
+          if (!tx.recurring || !tx.recurring.frequency) continue;
+          const freq = RECURRING_FREQUENCIES.find(f => f.value === tx.recurring!.frequency);
+          if (!freq) continue;
+
+          const endDate = tx.recurring.endDate ? new Date(tx.recurring.endDate) : null;
+          if (endDate && endDate < today) continue;
+
+          const startFrom = tx.recurring.lastGeneratedDate
+            ? new Date(tx.recurring.lastGeneratedDate)
+            : new Date(tx.date);
+
+          let next = new Date(startFrom);
+          next.setDate(next.getDate() + freq.days);
+
+          let lastGen = tx.recurring.lastGeneratedDate;
+          while (next <= today && (!endDate || next <= endDate)) {
+            const occurrenceDate = next.toISOString().split('T')[0];
+            // Skip if a generated occurrence already exists for this parent on this date
+            const exists = allTx.some(t => t.notes?.includes(`[recurring:${tx.id}:${occurrenceDate}]`));
+            if (!exists) {
+              const dueOffsetMs = new Date(tx.dueDate).getTime() - new Date(tx.date).getTime();
+              const newDue = new Date(next.getTime() + dueOffsetMs);
+              toCreate.push({
+                id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${toCreate.length}`,
+                type: tx.type,
+                person: tx.person,
+                amount: tx.amount,
+                currency: tx.currency,
+                date: occurrenceDate,
+                dueDate: newDue.toISOString().split('T')[0],
+                status: 'pending',
+                archived: false,
+                notes: `${tx.notes || ''}\n[recurring:${tx.id}:${occurrenceDate}]`.trim(),
+                category: tx.category,
+                recurring: null,
+              });
+            }
+            lastGen = occurrenceDate;
+            next.setDate(next.getDate() + freq.days);
+          }
+
+          if (lastGen && lastGen !== tx.recurring.lastGeneratedDate) {
+            updates.push({ id: tx.id, lastGeneratedDate: lastGen });
+          }
+        }
+
+        if (toCreate.length === 0 && updates.length === 0) return 0;
+
+        set((s) => ({
+          transactions: [
+            ...s.transactions.map(t => {
+              const u = updates.find(x => x.id === t.id);
+              return u && t.recurring
+                ? { ...t, recurring: { ...t.recurring, lastGeneratedDate: u.lastGeneratedDate } }
+                : t;
+            }),
+            ...toCreate,
+          ],
+          archivedTransactions: s.archivedTransactions.map(t => {
+            const u = updates.find(x => x.id === t.id);
+            return u && t.recurring
+              ? { ...t, recurring: { ...t.recurring, lastGeneratedDate: u.lastGeneratedDate } }
+              : t;
+          }),
+        }));
+
+        for (const tx of toCreate) {
+          if (tx.status === 'pending') {
+            scheduleNotification(tx, get().settings.notifications);
+          }
+        }
+
+        return toCreate.length;
       },
 
       // Getters

@@ -18,7 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useMoneyMateStore } from '../store';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, FONT_SIZES, CURRENCIES, RECURRING_FREQUENCIES, FONTS } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, FONT_SIZES, CURRENCIES, RECURRING_FREQUENCIES, FONTS, CATEGORIES, DEFAULT_CATEGORY_ID } from '../constants';
 import { validateTransaction, formatCurrency } from '../utils';
 import type { Transaction } from '../types';
 
@@ -37,6 +37,7 @@ const AddTransactionScreen: React.FC = () => {
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: 'pending' as 'pending' | 'paid',
     notes: '',
+    category: DEFAULT_CATEGORY_ID,
     recurring: null as { frequency: string; endDate: string } | null,
   });
 
@@ -237,20 +238,20 @@ const AddTransactionScreen: React.FC = () => {
               >
                 <View style={styles.currencyOptionContent}>
                   <Text style={[
-                    styles.currencyCode,
+                    styles.currencyOptionCode,
                     formData.currency === currency.code && styles.currencyCodeSelected
                   ]}>
                     {currency.code}
                   </Text>
                   <Text style={[
-                    styles.currencyName,
+                    styles.currencyOptionName,
                     formData.currency === currency.code && styles.currencyNameSelected
                   ]}>
                     {currency.name}
                   </Text>
                 </View>
                 <Text style={[
-                  styles.currencySymbol,
+                  styles.currencyOptionSymbol,
                   formData.currency === currency.code && styles.currencySymbolSelected
                 ]}>
                   {currency.symbol}
@@ -508,6 +509,38 @@ const AddTransactionScreen: React.FC = () => {
                   )}
                 </View>
               )}
+            </View>
+
+            {/* Category */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Category</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: SPACING.sm, gap: SPACING.sm }}>
+                {CATEGORIES.map((cat) => {
+                  const selected = formData.category === cat.id;
+                  return (
+                    <TouchableOpacity
+                      key={cat.id}
+                      onPress={() => handleInputChange('category', cat.id)}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingHorizontal: SPACING.md,
+                        paddingVertical: SPACING.sm,
+                        marginRight: SPACING.sm,
+                        borderRadius: BORDER_RADIUS.md,
+                        backgroundColor: selected ? cat.color : COLORS.cardBackground,
+                        borderWidth: 1,
+                        borderColor: selected ? cat.color : COLORS.border,
+                      }}
+                    >
+                      <Ionicons name={cat.icon as any} size={16} color={selected ? 'white' : cat.color} />
+                      <Text style={{ marginLeft: SPACING.xs, color: selected ? 'white' : COLORS.textPrimary, fontWeight: '600' }}>
+                        {cat.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
             </View>
 
             {/* Notes */}
@@ -858,7 +891,7 @@ const styles = StyleSheet.create({
   currencyOptionContent: {
     flex: 1,
   },
-  currencyCode: {
+  currencyOptionCode: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
     color: COLORS.textPrimary,
@@ -867,14 +900,14 @@ const styles = StyleSheet.create({
   currencyCodeSelected: {
     color: COLORS.primary,
   },
-  currencyName: {
+  currencyOptionName: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
   },
   currencyNameSelected: {
     color: COLORS.primary,
   },
-  currencySymbol: {
+  currencyOptionSymbol: {
     fontSize: FONT_SIZES.xl,
     fontWeight: '600',
     color: COLORS.textSecondary,

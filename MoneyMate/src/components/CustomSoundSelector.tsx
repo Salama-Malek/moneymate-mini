@@ -62,7 +62,11 @@ const SOUND_TYPES: { type: SoundType; label: string; icon: string; description: 
 const CustomSoundSelector: React.FC<CustomSoundSelectorProps> = ({ onSoundSelected }) => {
   const { colors, shadows } = useTheme();
   const [selectedSounds, setSelectedSounds] = useState<Map<SoundType, CustomSound>>(
-    new Map(SOUND_TYPES.map(st => [st.type, soundVibrationService.getCustomSoundByType(st.type)]).filter(([_, sound]) => sound !== null))
+    new Map(
+      SOUND_TYPES
+        .map(st => [st.type, soundVibrationService.getCustomSoundByType(st.type)] as const)
+        .filter((entry): entry is readonly [SoundType, CustomSound] => entry[1] !== null)
+    )
   );
 
   const handlePickSound = async (soundType: SoundType) => {

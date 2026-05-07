@@ -18,7 +18,9 @@ import { useMoneyMateStore } from '../store';
 import { SPACING, BORDER_RADIUS, FONT_SIZES, CURRENCIES, REMINDER_OPTIONS, LANGUAGES } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { exportData, importData } from '../utils';
+import { exportData, exportDataAsCSV, importData } from '../utils';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation';
 import { soundVibrationService } from '../utils/soundVibrationService';
@@ -110,25 +112,47 @@ const SettingsScreen: React.FC = () => {
     updateSettings({ biometricEnabled: enabled });
   };
 
-  const handleExportData = async () => {
-    try {
-      const allTransactions = [...transactions, ...archivedTransactions];
-      const exportString = exportData(allTransactions);
-      
-      await soundVibrationService.buttonPress();
-      await Alert.alert('Exporting Data', 'Please wait while your data is being exported...');
-      await soundVibrationService.successAction();
-
-      await soundVibrationService.buttonPress();
-      await Share.share({
-        message: `MoneyMate Data Export\n\n${exportString}`,
-        title: 'MoneyMate Data Export',
-      });
-      await soundVibrationService.successAction();
-    } catch (error) {
-      await soundVibrationService.buttonPress();
-      Alert.alert('Export Failed', 'Failed to export data. Please try again.');
+  const writeAndShare = async (filename: string, content: string, mimeType: string) => {
+    const dir = (FileSystem as any).cacheDirectory || (FileSystem as any).documentDirectory;
+    const uri = `${dir}${filename}`;
+    await FileSystem.writeAsStringAsync(uri, content);
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, { mimeType, dialogTitle: 'Export MoneyMate data' });
+    } else {
+      await Share.share({ message: content, title: filename });
     }
+  };
+
+  const handleExportData = async () => {
+    Alert.alert('Export format', 'Choose an export format', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'JSON',
+        onPress: async () => {
+          try {
+            const allTransactions = [...transactions, ...archivedTransactions];
+            await soundVibrationService.buttonPress();
+            await writeAndShare('moneymate-export.json', exportData(allTransactions), 'application/json');
+            await soundVibrationService.successAction();
+          } catch {
+            Alert.alert('Export Failed', 'Failed to export data. Please try again.');
+          }
+        },
+      },
+      {
+        text: 'CSV',
+        onPress: async () => {
+          try {
+            const allTransactions = [...transactions, ...archivedTransactions];
+            await soundVibrationService.buttonPress();
+            await writeAndShare('moneymate-export.csv', exportDataAsCSV(allTransactions), 'text/csv');
+            await soundVibrationService.successAction();
+          } catch {
+            Alert.alert('Export Failed', 'Failed to export data. Please try again.');
+          }
+        },
+      },
+    ]);
   };
 
   const handleImportData = () => {
