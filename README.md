@@ -1,153 +1,65 @@
-# MoneyMate – Personal Lending & Borrowing Tracker
+# MoneyMate
 
-**Description:**
-MoneyMate is a React Native app for tracking money you lend or borrow. It stores all data locally on your phone, supports multiple currencies, sends reminders for upcoming repayments, and allows archiving of completed transactions.
+A React Native + Expo app for tracking money you lend or borrow, fully offline.
 
----
+## Overview
+
+MoneyMate helps you keep track of personal loans — money lent to or borrowed from friends and family — without needing an internet connection. Every transaction is stored on-device, with support for multiple currencies, wallets, due-date reminders, and multi-language (including RTL Arabic) UI. The app is built with Expo and TypeScript, using Zustand for state management with local persistence.
 
 ## Features
 
-### Transactions
-- Add new transactions:
-  - Type: Lend / Borrow
-  - Person’s Name / Contact
-  - Amount
-  - Currency (EGP, USD, Ruble, etc.)
-  - Date Lent/Borrowed
-  - Due Date
-  - Status: Pending / Paid
-  - Notes: Optional
-- Edit / Delete transactions
-- Archive completed transactions
-- Restore archived transactions
-- Swipe actions for quick edit/archive/delete
+- **Transactions** — add, edit, delete, archive, and restore lend/borrow records with person, amount, currency, category, dates, status, and optional notes
+- **Recurring transactions** — automatically generates due transactions on a schedule
+- **Wallets** — track balances across multiple wallets, with transfers and wallet-level transaction history
+- **Multi-currency** — per-transaction currency (EGP, USD, EUR, GBP, RUB, JPY, CNY, INR)
+- **Notifications & reminders** — local push notifications with configurable timing, custom notification sounds, and vibration
+- **Analytics dashboard** — totals for lent/borrowed/outstanding amounts, overdue tracking, and charts
+- **Search & filter** — filter by type, status, currency, or category; search by person or notes
+- **Biometric lock** — optional PIN/biometric app lock
+- **Dark/light theme** — full theming via a theme context
+- **Multi-language** — in-app language switching with RTL support for Arabic
+- **Offline-first storage** — all data persisted locally with AsyncStorage
 
-### Notifications & Reminders
-- Local push notifications for upcoming due dates
-- Configurable reminder timing (1, 3, 7 days before due)
-- Notifications include person name, amount, due date
-- Notifications stop for archived transactions
+## Tech stack
 
-### Multi-Currency Support
-- Store currency with each transaction
-- Optional: show total in a default currency
+- React Native + Expo (SDK 54)
+- TypeScript
+- Zustand (with AsyncStorage persistence)
+- React Navigation (native stack + bottom tabs)
+- Expo Notifications, Expo Local Authentication, Expo Document Picker
+- react-native-chart-kit for analytics charts
+- date-fns for date handling
 
-### Analytics & Dashboard
-- Summary totals: Total lent, total borrowed, outstanding amounts
-- Highlight overdue transactions
-- Optional charts for visual insights
+## Getting started
 
-### Search & Filter
-- Search by person, amount, notes
-- Filter by type, status, or currency
+The app lives in the `MoneyMate/` directory.
 
-### Offline Storage
-- All data stored locally on the device
-- Uses AsyncStorage or SQLite
-- Works fully offline
-- Optional: export/import data as JSON for backup
-
-### Optional Advanced Features
-- Recurring transactions
-- Secure login (PIN or biometric)
-- Calendar view for upcoming payments
-- Dark/light theme
-
----
-
-## Data Model
-
-```json
-{
-  "id": "uuid",
-  "type": "lend",
-  "person": "Ahmed",
-  "amount": 500,
-  "currency": "EGP",
-  "date": "2025-08-19",
-  "dueDate": "2025-09-05",
-  "status": "pending",
-  "archived": false,
-  "notes": "Lent for groceries",
-  "recurring": null
-}
-```
-
----
-
-## App Screens & Layout
-
-1. **Home / Dashboard**
-   - Summary of totals (lent, borrowed, pending, overdue)
-   - Quick add button
-   - Overview of upcoming due transactions
-
-2. **Transaction List**
-   - Tabs: Active / Archived
-   - Each transaction shows person, amount + currency, due date, status
-   - Swipe actions: Edit / Archive / Delete
-
-3. **Add / Edit Transaction**
-   - Form fields for all transaction details
-   - Save or cancel
-
-4. **Archived Transactions**
-   - Restore / Edit / Delete
-
-5. **Notifications Settings**
-   - Configure reminder times
-   - Enable/disable notifications
-
-6. **Analytics / Insights**
-   - Totals, overdue list, optional charts
-
-7. **Settings**
-   - Default currency, theme, backup/export, optional PIN/biometric login
-
----
-
-## Tech Stack
-- React Native + TypeScript
-- AsyncStorage / SQLite / Realm
-- Redux or Zustand
-- date-fns or moment for date handling
-- Optional: Currency API (OpenExchangeRates / Fixer.io)
-
----
-
-## Installation & Setup
-
-1. Clone repository / scaffold via Cursor AI
-2. Install dependencies:
 ```bash
+cd MoneyMate
 npm install
-# or
-yarn install
+
+npm start        # start the Expo dev server
+npm run android  # run on Android emulator/device
+npm run ios      # run on iOS simulator/device
+npm run web      # run in the browser
 ```
-3. Run on device or simulator:
-```bash
-npx react-native run-android
-npx react-native run-ios
+
+Requires Node.js and the Expo Go app (or a simulator) to run on a device.
+
+## Project structure
+
 ```
-4. Grant notification permissions on the device
-5. App is ready to use offline
-
----
-
-## Usage Flow
-
-1. Open app → view active transactions
-2. Add new transaction → choose type, amount, due date, currency
-3. App schedules local notification for due date
-4. When payment is received → mark as paid → archive transaction
-5. Archived transactions can be restored if needed
-6. Search, filter, or view summary anytime
-
----
-
-## Development Notes
-- Fully offline-first; all data stored on-device
-- Use AsyncStorage for small-scale storage, SQLite/Realm for more robust queries
-- Notifications scheduled locally
-- Multi-currency stored per transaction; optional conversion API
-# moneymate-mini
+MoneyMate/
+├── App.tsx                 # App entry point, providers, boot sequence
+├── app.json                 # Expo configuration
+├── src/
+│   ├── components/          # BiometricLock, TransactionCard, StatsCard, FloatingActionButton, CustomSoundSelector
+│   ├── constants/           # Theme colors, categories, currencies, translations
+│   ├── contexts/            # ThemeContext, LanguageContext (RTL-aware)
+│   ├── navigation/           # Stack + tab navigation
+│   ├── screens/              # Home, Transactions, Wallet, Analytics, Settings, Add/Edit Transaction, Notification Settings
+│   ├── store/                # Zustand store (transactions, wallets, settings)
+│   ├── types/                # Shared TypeScript types
+│   └── utils/                # Notification scheduling, dashboard stats, sound/vibration service
+└── assets/                  # App icons and splash screen
+```
