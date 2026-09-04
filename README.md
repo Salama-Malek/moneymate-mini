@@ -63,3 +63,7 @@ MoneyMate/
 │   └── utils/                # Notification scheduling, dashboard stats, sound/vibration service
 └── assets/                  # App icons and splash screen
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
